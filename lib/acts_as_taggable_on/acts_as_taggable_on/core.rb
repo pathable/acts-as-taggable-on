@@ -130,7 +130,7 @@ module ActsAsTaggableOn::Taggable
     
     module InstanceMethods
       def scoped_model
-        self.send(tag_scope)
+        tag_scope.nil? ? nil : self.send(tag_scope)
       end
       
       # all column names are necessary for PostgreSQL group clause
@@ -228,7 +228,7 @@ module ActsAsTaggableOn::Taggable
           tag_list = tag_list_cache_on(context).uniq
 
           # Find existing tags or create non-existing tags:
-          tag_list = ActsAsTaggableOn::Tag.find_or_create_all_with_like_by_name(tag_list)
+          tag_list = ActsAsTaggableOn::Tag.find_or_create_all_with_like_by_name(tag_list, scoped_model)
 
           current_tags = tags_on(context)
           old_tags     = current_tags - tag_list

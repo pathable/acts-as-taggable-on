@@ -12,17 +12,28 @@ describe "Acts As Taggable On" do
   describe "Scoped taggable model" do
     before(:each) do
       clean_database!
-      @taggable = ScopedTaggableModel.new(:name => "Bob Jones")
+      @scoped_model = TaggableModel.create(:name => 'scoped model')
+      @taggable = ScopedTaggableModel.new(:name => "Bob Jones", :need_list => 'this, that')
+      @taggable.taggable_model = @scoped_model
+      @taggable.save
+      @taggable.reload
     end    
     
     it 'should have a tag scope' do
-      @taggable.tag_scope.should == :community
+      @taggable.tag_scope.should == :taggable_model
     end
     
     it 'should have a scoped model' do
-      @taggable.scoped_model.should be_instance_of(Community)
+      @taggable.scoped_model.should be_instance_of(TaggableModel)
     end
     
+    it "should save two tags with scope" do
+      @taggable.needs.size.should == 2
+    end
+
+    it "should save two tags with scope" do
+      @taggable.needs.first.scoped.should == @taggable_model
+    end    
   end
 
   describe "Taggable Method Generation" do
