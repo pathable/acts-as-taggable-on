@@ -14,7 +14,11 @@ ActiveRecord::Schema.define :version => 0 do
 
   create_table "tags", :force => true do |t|
     t.string "name"
+    t.integer  "scoped_id",   :limit => 11
+    t.string   "scoped_type"    
   end
+  
+  add_index "tags", ["scoped_id", "scoped_type", "name"]
   
   create_table :taggable_models, :force => true do |t|
     t.column :name, :string

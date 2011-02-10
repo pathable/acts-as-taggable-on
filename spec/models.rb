@@ -29,3 +29,22 @@ end
 class UntaggableModel < ActiveRecord::Base
   belongs_to :taggable_model
 end
+
+class ScopedTaggableModel < UntaggableModel
+  acts_as_taggable_on :needs, :offerings, :scope => :community
+  has_many :untaggable_models  
+  
+  def community
+    Community.new
+  end
+end
+
+class Community
+  def id
+    1
+  end
+  
+  def type
+    'community'
+  end
+end

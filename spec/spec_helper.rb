@@ -29,7 +29,7 @@ unless [].respond_to?(:freq)
   end
 end
 
-ENV['DB'] ||= 'sqlite3'
+ENV['DB'] ||= 'mysql'
 
 database_yml = File.expand_path('../database.yml', __FILE__)
 if File.exists?(database_yml)
@@ -51,7 +51,7 @@ end
 
 def clean_database!
   models = [ActsAsTaggableOn::Tag, ActsAsTaggableOn::Tagging, TaggableModel, OtherTaggableModel, InheritingTaggableModel,
-            AlteredInheritingTaggableModel, TaggableUser, UntaggableModel]
+            AlteredInheritingTaggableModel, TaggableUser, UntaggableModel, ScopedTaggableModel]
   models.each do |model|
     ActiveRecord::Base.connection.execute "DELETE FROM #{model.table_name}"
   end

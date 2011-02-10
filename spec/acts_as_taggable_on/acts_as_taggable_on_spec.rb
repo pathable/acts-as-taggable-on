@@ -9,6 +9,22 @@ describe "Acts As Taggable On" do
     UntaggableModel.should_not be_taggable
   end
 
+  describe "Scoped taggable model" do
+    before(:each) do
+      clean_database!
+      @taggable = ScopedTaggableModel.new(:name => "Bob Jones")
+    end    
+    
+    it 'should have a tag scope' do
+      @taggable.tag_scope.should == :community
+    end
+    
+    it 'should have a scoped model' do
+      @taggable.scoped_model.should be_instance_of(Community)
+    end
+    
+  end
+
   describe "Taggable Method Generation" do
     before(:each) do
       clean_database!

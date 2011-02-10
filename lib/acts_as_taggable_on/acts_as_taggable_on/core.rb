@@ -129,6 +129,10 @@ module ActsAsTaggableOn::Taggable
     end    
     
     module InstanceMethods
+      def scoped_model
+        self.send(tag_scope)
+      end
+      
       # all column names are necessary for PostgreSQL group clause
       def grouped_column_names_for(object)
         self.class.grouped_column_names_for(object)

@@ -5,6 +5,7 @@ describe ActsAsTaggableOn::Tag do
     clean_database!
     @tag = ActsAsTaggableOn::Tag.new
     @user = TaggableModel.create(:name => "Pablo")
+    OtherTaggableModel
   end
 
   describe "named like any" do
@@ -38,6 +39,53 @@ describe ActsAsTaggableOn::Tag do
       }.should change(ActsAsTaggableOn::Tag, :count).by(1)
     end
   end
+  
+  describe 'find or create by name with scope' do
+    before(:each) do
+      @tag_scope = OtherTaggableModel.create(:name => "SCOPED")
+      @other_tag_scope = OtherTaggableModel.create(:name => 'other scoped')
+    end
+    
+    it 'should create with scope' do
+      tag = ActsAsTaggableOn::Tag.new(:name => 'taged rad aesome')
+      tag.scoped = @tag_scope
+      tag.save!
+      tag.scoped_id.should be_present
+      tag.scoped_type.should be_present
+    end
+
+    it "should find or create by name without scope" do
+      lambda {
+        ActsAsTaggableOn::Tag.find_or_create_all_with_like_by_name(["awesome"])
+      }.should change(ActsAsTaggableOn::Tag, :count).by(1)
+    end
+    
+    it 'should find or create by name with scope' do
+      lambda {
+        ActsAsTaggableOn::Tag.find_or_create_all_with_like_by_name(["awesome"], @tag_scope)
+      }.should change(ActsAsTaggableOn::Tag.with_tag_scope(@tag_scope), :count).by(1)            
+    end    
+
+    it "should find or create by name with multiple scopes" do
+      lambda {
+        ActsAsTaggableOn::Tag.find_or_create_all_with_like_by_name(["awesome"], @tag_scope)
+      }.should change(ActsAsTaggableOn::Tag.with_tag_scope(@tag_scope), :count).by(1)      
+      
+      lambda {
+        ActsAsTaggableOn::Tag.find_or_create_all_with_like_by_name(["awesome"], @other_tag_scope)
+      }.should change(ActsAsTaggableOn::Tag.with_tag_scope(@other_tag_scope), :count).by(1)                        
+    end
+
+    it "should find or create by name with multiple scopes not messing with others" do
+      lambda {
+        ActsAsTaggableOn::Tag.find_or_create_all_with_like_by_name(["awesome"], @tag_scope)
+      }.should change(ActsAsTaggableOn::Tag.with_tag_scope(@other_tag_scope), :count).by(0)
+      
+      lambda {
+        ActsAsTaggableOn::Tag.find_or_create_all_with_like_by_name(["awesome"], @other_tag_scope)
+      }.should change(ActsAsTaggableOn::Tag.with_tag_scope(@tag_scope), :count).by(0)                        
+    end    
+  end
 
   describe "find or create all by any name" do
     before(:each) do
@@ -59,9 +107,9 @@ describe ActsAsTaggableOn::Tag do
       }.should change(ActsAsTaggableOn::Tag, :count).by(1)
     end
 
-    it "should find or create by name" do
+    it "should find or create by name, stripping whitespace" do
       lambda {
-        ActsAsTaggableOn::Tag.find_or_create_all_with_like_by_name("awesome", "epic").map(&:name).should == ["awesome", "epic"]
+        ActsAsTaggableOn::Tag.find_or_create_all_with_like_by_name(["  awesome ", " epic      "]).map(&:name).should == ["awesome", "epic"]
       }.should change(ActsAsTaggableOn::Tag, :count).by(1)
     end
 
